@@ -4,14 +4,20 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/Index.vue') }],
+    children: [
+      { path: '', component: () => import('pages/Index.vue') },
+      { path: 'publications', name: 'Publications', component: () => import('pages/Publications.vue') },
+      { path: 'profile', name: 'profile', component: () => import('pages/Profile.vue') },
+    ],
   },
   {
     path: '/login',
+    name: 'Login',
     component: () => import('pages/Login.vue'),
   },
   {
-    path: '/singup',
+    path: '/ingup',
+    name: 'Singup',
     component: () => import('pages/Signup.vue'),
   },
 
@@ -22,5 +28,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/Error404.vue'),
   },
 ];
+
 
 export default routes;

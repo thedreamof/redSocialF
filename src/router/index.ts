@@ -34,5 +34,11 @@ export default route<StateInterface>(function (/* { store, ssrContext } */) {
     ),
   });
 
+  Router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('token');
+    if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+    else next()
+  })
+
   return Router;
 });

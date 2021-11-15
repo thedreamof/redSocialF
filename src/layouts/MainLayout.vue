@@ -89,6 +89,7 @@
                         v-ripple
                         v-for="link in links1"
                         :key="link.text"
+                        :to="link.go"
                         clickable
                     >
                         <q-item-section avatar>
@@ -115,7 +116,7 @@
             </q-scroll-area>
         </q-drawer>
 
-        <q-page-container>
+        <q-page-container >
             <router-view />
         </q-page-container>
     </q-layout>
@@ -168,8 +169,9 @@ export default {
             byDate,
 
             links1: [
-                { icon: 'web', text: 'Publications' },
-                { icon: 'person', text: 'People' },
+                { icon: 'web', text: 'Publications', go: 'Publications' },
+                { icon: 'people', text: 'People', go: 'Peoples' },
+                { icon: 'person', text: 'Profile', go: 'Profile' },
             ],
 
             onClear,
