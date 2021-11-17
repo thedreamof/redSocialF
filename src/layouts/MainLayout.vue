@@ -69,8 +69,39 @@
                                 src="https://cdn.quasar.dev/img/boy-avatar.png"
                             />
                         </q-avatar>
-                        <q-tooltip>Account</q-tooltip>
+                        <q-menu>
+                            <div class="row no-wrap q-pa-md">
+                                <div class="column items-center">
+                                    <q-avatar size="72px">
+                                        <img
+                                            src="https://cdn.quasar.dev/img/avatar4.jpg"
+                                        />
+                                    </q-avatar>
+
+                                    <div class="text-subtitle1 q-mt-md q-mb-xs">
+                                        {{userAuth.username}}
+                                    </div>
+
+                                    <q-btn
+                                        color="primary"
+                                        label="Logout"
+                                        push
+                                        size="sm"
+                                        @click="logout"
+                                        v-close-popup
+                                    />
+                                </div>
+                            </div>
+                        </q-menu>
                     </q-btn>
+                    <!-- <q-btn round flat>
+                        <q-avatar size="26px">
+                            <img
+                                src="https://cdn.quasar.dev/img/boy-avatar.png"
+                            />
+                        </q-avatar>
+                        <q-tooltip>Account</q-tooltip>
+                    </q-btn> -->
                 </div>
             </q-toolbar>
         </q-header>
@@ -87,7 +118,7 @@
                     <q-item
                         class="GNL__drawer-item"
                         v-ripple
-                        v-for="link in links1"
+                        v-for="link in links"
                         :key="link.text"
                         :to="link.go"
                         clickable
@@ -116,7 +147,7 @@
             </q-scroll-area>
         </q-drawer>
 
-        <q-page-container >
+        <q-page-container>
             <router-view />
         </q-page-container>
     </q-layout>
@@ -124,59 +155,46 @@
 
 <script lang="ts">
 import { ref } from 'vue';
+import { IUser } from 'src/interfaces/users';
+import { useRouter } from 'vue-router';
 // import { fasGlobeAmericas, fasFlask } from '@quasar/extras/fontawesome-v5';
 
 export default {
     name: 'MainLayout',
 
     setup() {
+        // --- VARIABLES
+        const router = useRouter();
         const leftDrawerOpen = ref(false);
         const search = ref('');
-        const showAdvanced = ref(false);
-        const showDateOptions = ref(false);
-        const exactPhrase = ref('');
-        const hasWords = ref('');
-        const excludeWords = ref('');
-        const byWebsite = ref('');
-        const byDate = ref('Any time');
+        const user = localStorage.getItem('user') || '';
+        const userAuth: IUser = JSON.parse(user) as IUser;
 
-        function onClear() {
-            exactPhrase.value = '';
-            hasWords.value = '';
-            excludeWords.value = '';
-            byWebsite.value = '';
-            byDate.value = 'Any time';
-        }
+        const links = [
+            { icon: 'web', text: 'Publications', go: 'Publications' },
+            { icon: 'people', text: 'People', go: 'Peoples' },
+            { icon: 'person', text: 'Profile', go: 'Profile' }
+        ];
 
-        function changeDate(option: string) {
-            byDate.value = option;
-            showDateOptions.value = false;
-        }
-
-        function toggleLeftDrawer() {
+        // --- FUNCTIONS
+        const toggleLeftDrawer = () => {
             leftDrawerOpen.value = !leftDrawerOpen.value;
         }
 
+        const logout = () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            void router.push({name: 'Login'});
+        }
+
+        // --- RETURNS
         return {
             leftDrawerOpen,
             search,
-            showAdvanced,
-            showDateOptions,
-            exactPhrase,
-            hasWords,
-            excludeWords,
-            byWebsite,
-            byDate,
-
-            links1: [
-                { icon: 'web', text: 'Publications', go: 'Publications' },
-                { icon: 'people', text: 'People', go: 'Peoples' },
-                { icon: 'person', text: 'Profile', go: 'Profile' },
-            ],
-
-            onClear,
-            changeDate,
+            links,
             toggleLeftDrawer,
+            userAuth,
+            logout,
         };
     },
 };

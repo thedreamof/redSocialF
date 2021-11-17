@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 <template>
     <div class="login-content row justify-center items-center">
         <q-card flat bordered class="login">
@@ -46,6 +47,20 @@
                     </div>
                 </q-form>
             </q-card-section>
+
+            <q-separator inset=""></q-separator>
+
+            <q-card-section>
+                Are you have not register?
+                    <q-chip
+                        clickable
+                        @click="goSignUp"
+                        color="primary"
+                        text-color="white"
+                    >
+                        Click here!
+                    </q-chip>
+            </q-card-section>
         </q-card>
     </div>
 </template>
@@ -73,17 +88,18 @@ export default defineComponent({
                 const res: { token: string; payload: unknown } = (
                     await api.post('auth/login', params)
                 ).data as { token: string; payload: unknown };
+
                 localStorage.setItem('token', res.token);
-                console.log(res.payload);
-                console.log(res.token);
-                void router.push({name: 'Publications'});
-            } catch (error: unknown) {
-                console.error(error);
+                localStorage.setItem('user', JSON.stringify(res.payload));
+                void router.push({ name: 'Publications' });
+            } catch (error: any) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const err = error.message as string;
                 $q.notify({
                     color: 'red-5',
                     textColor: 'white',
                     icon: 'error',
-                    message: 'Error try again',
+                    message: err || 'Error try again',
                 });
             }
         };
@@ -93,8 +109,12 @@ export default defineComponent({
             form.password = '';
         };
 
+        const goSignUp = () => {
+            void router.push({ name: 'Signup' });
+        };
+
         // --- RETURNS
-        return { ...toRefs(form), onSubmit, onReset };
+        return { ...toRefs(form), onSubmit, onReset, goSignUp };
     },
 });
 </script>

@@ -115,13 +115,14 @@
 
 <script lang="ts">
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 import { api } from 'src/boot/axios';
 import { defineComponent, toRefs, reactive } from 'vue';
 
 export default defineComponent({
     name: 'Signup',
     setup() {
+        
         // --- VARIABLES
         const $q = useQuasar();
         const router = useRouter();
@@ -136,6 +137,17 @@ export default defineComponent({
         });
 
         // --- FUNCTIONS
+        const auth = async () => {
+            const params = { username: form.username, password: form.password };
+            const res: { token: string; payload: unknown } = (
+                await api.post('auth/login', params)
+            ).data as { token: string; payload: unknown };
+
+            localStorage.setItem('token', res.token);
+            localStorage.setItem('user', JSON.stringify(res.payload));
+            void router.push({ name: 'Publications' });
+        };
+
         const onSubmit = async () => {
             if (form.accept !== true) {
                 $q.notify({
@@ -155,18 +167,20 @@ export default defineComponent({
                 };
 
                 try {
-                    const res: unknown = (await api.post('/users', params)).data;
+                    const res: unknown = (await api.post('/users', params))
+                        .data;
                     if (res) {
                         $q.notify({
                             color: 'green-4',
                             textColor: 'white',
                             icon: 'cloud_done',
-                            message: 'Submitted',
+                            message: 'Welcome!!',
                         });
+
+                        void auth();
                     }
 
-                    void router.push({name: 'Publications'});
-
+                    void router.push({ name: 'Publications' });
                 } catch (error) {
                     $q.notify({
                         color: 'red-5',
