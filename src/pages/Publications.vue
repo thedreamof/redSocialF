@@ -36,59 +36,6 @@
                 @giveLike="giveLike(index, $event)"
                 @addComment="addComment(index, $event)"
             />
-
-            <!-- <q-card
-                class="publication"
-                v-for="(item, index) in publications"
-                :key="item"
-            >
-                <q-item>
-                    <q-item-section avatar>
-                        <q-avatar>
-                            <img :src="item.userCreated.avatar" />
-                        </q-avatar>
-                    </q-item-section>
-
-                    <q-item-section>
-                        <q-item-label>{{
-                            item.userCreated.username
-                        }}</q-item-label>
-                        <q-item-label caption>{{ item.title }}</q-item-label>
-                    </q-item-section>
-
-                    <q-item-section>
-                        <q-card-actions horizontal class="justify-end q-px-md">
-                            <q-item-label caption>{{
-                                item.createAt
-                            }}</q-item-label>
-                            <q-btn
-                                flat
-                                round
-                                color="red"
-                                icon="favorite"
-                                @click="giveLike(item, index)"
-                            >
-                                <q-badge color="red" floating transparent>{{
-                                    item.likes.length
-                                }}</q-badge>
-                            </q-btn>
-                        </q-card-actions>
-                    </q-item-section>
-                </q-item>
-
-                <q-card-section>
-                    <div>
-                        {{ item.description }}
-                    </div>
-                    <q-card-actions horizontal class="justify-end q-px-md">
-                        <q-chip clickable icon="comment">Comment</q-chip>
-                    </q-card-actions>
-                </q-card-section>
-
-                <q-card-section>
-
-                </q-card-section>
-            </q-card> -->
         </div>
     </q-page>
 </template>
@@ -141,8 +88,8 @@ export default defineComponent({
             let commentsSort: IComment[] = comments.sort(
                 (a: IComment, b: IComment) => {
                     return (
-                        new Date(b.createAt).getTime() -
-                        new Date(a.createAt).getTime()
+                        new Date(a.createAt).getTime() -
+                        new Date(b.createAt).getTime()
                     );
                 }
             );
@@ -184,15 +131,16 @@ export default defineComponent({
                 reset();
                 void getPublications();
             }
-            loading.value = false;
+            // loading.value = false;
         };
 
         const giveLike = (index: number, liked: IPublication) => {
             publications.value[index] = liked;
         };
 
-        const addComment = (index: number, comment: IPublication) => {
-            publications.value[index] = comment;
+        const addComment = (index: number, comment: IComment[]) => {
+            publications.value[index].comments = comment;
+            void getPublications();
         };
 
         // --- initial functions
