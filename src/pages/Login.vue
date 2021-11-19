@@ -83,7 +83,7 @@ export default defineComponent({
             username: '',
             password: '',
         });
-        const loading = ref(true);
+        const loading = ref(false);
 
         // --- FUNCTIONS
         const onSubmit = async () => {
