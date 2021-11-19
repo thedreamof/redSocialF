@@ -27,7 +27,7 @@
 
             <q-separator />
 
-            <q-card-actions>
+            <q-card-actions v-if="canEdit">
                 <q-btn flat round icon="edit" @click="isEditing = !isEditing" />
             </q-card-actions>
         </q-card>
@@ -185,7 +185,7 @@
 <script lang="ts">
 import { defineComponent, toRefs, ref, reactive } from 'vue';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
 import { IUser } from 'src/interfaces/users';
 import { IPublication } from 'src/interfaces/publications';
@@ -200,6 +200,7 @@ export default defineComponent({
         // --- VARIABLES
         const $q = useQuasar();
         const router = useRouter();
+        const route = useRoute();
         const form = reactive({
             avatar: '',
             filename: null,
@@ -216,6 +217,7 @@ export default defineComponent({
         const loading = ref(false);
         const loadingUser = ref(false);
         const loadingPublication = ref(false);
+        const canEdit = ref(false);
 
         // --- FUNCTIONS
         const updateAvatar = (e: any) => {
@@ -228,8 +230,9 @@ export default defineComponent({
 
         const getUser = async () => {
             loadingUser.value = true;
+            const userProfile = route.params.id;
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            const res = (await api.get(`/users/${userAuth.idUser}`))
+            const res = (await api.get(`/users/${userProfile}`))
                 .data as IUser;
 
             form.avatar = res.avatar || '';
@@ -247,20 +250,25 @@ export default defineComponent({
                 idUser: res._id,
             };
 
-            localStorage.removeItem('user');
-            setTimeout(() => {
-                localStorage.setItem('user', JSON.stringify(user));
-            }, 500);
+            if( userAuth.idUser === route.params.id ) {
+                canEdit.value = true;
+                localStorage.removeItem('user');
+                setTimeout(() => {
+                    localStorage.setItem('user', JSON.stringify(user));
+                }, 500);
+            }
+
 
             loadingUser.value = false;
         };
 
         const getPublications = async () => {
             loadingPublication.value = true;
+            const userProfile = route.params.id;
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             const res: Array<IPublication> =
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                (await api.get(`/publications/user/${userAuth.idUser}`))
+                (await api.get(`/publications/user/${userProfile}`))
                     .data as Array<IPublication>;
 
             if (!res) return;
@@ -380,6 +388,7 @@ export default defineComponent({
             loading,
             loadingUser,
             loadingPublication,
+            canEdit
         };
     },
 });

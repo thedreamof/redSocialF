@@ -117,11 +117,11 @@ export default {
         const search = ref('');
         const local = localStorage.getItem('user') || '';
         const userAuth: IUser = JSON.parse(local) as IUser;
-        const user = ref<IUser>();
+        const user = ref<IUser>() || '';
 
         const links = [
-            { icon: 'web', text: 'Publications', go: 'Publications' },
-            { icon: 'person', text: 'Profile', go: 'Profile' },
+            { icon: 'web', text: 'Publications', go: '/Publications' },
+            { icon: 'person', text: 'Profile', go: `/profile/${userAuth.idUser || ''}` },
         ];
 
         // --- FUNCTIONS

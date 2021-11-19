@@ -61,7 +61,6 @@ export default defineComponent({
             title: '',
             description: '',
         });
-        console.log('UserAuth', userAuth);
         const loading = ref(true);
 
         // --- FUNCTIONS

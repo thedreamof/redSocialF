@@ -5,14 +5,14 @@
             <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
         </div>
         <q-item>
-            <q-item-section avatar>
-                <q-avatar>
+            <q-item-section avatar style="cursor: pointer;">
+                <q-avatar @click="goProfile(publication.userCreated.idUser)">
                     <img :src="publication.userCreated.avatar" />
                 </q-avatar>
             </q-item-section>
 
-            <q-item-section>
-                <q-item-label>{{
+            <q-item-section style="cursor: pointer;">
+                <q-item-label @click="goProfile(publication.userCreated.idUser)" >{{
                     publication.userCreated.username
                 }}</q-item-label>
                 <q-item-label caption>{{ publication.title }}</q-item-label>
@@ -78,14 +78,14 @@
                 :key="comment"
                 class="bg-grey-3 q-mt-sm"
             >
-                <q-item-section avatar>
-                    <q-avatar>
+                <q-item-section avatar style="cursor: pointer;">
+                    <q-avatar @click="goProfile(comment.users.idUser)">
                         <img :src="comment.users.avatar" />
                     </q-avatar>
                 </q-item-section>
 
-                <q-item-section>
-                    <q-item-label>{{ comment.users.username }}</q-item-label>
+                <q-item-section style="cursor: pointer;">
+                    <q-item-label @click="goProfile(comment.users.idUser)">{{ comment.users.username }}</q-item-label>
                     <div>
                         {{ comment.description }}
                     </div>
@@ -117,6 +117,7 @@
 import { IComment, IPublication, IUser } from 'src/interfaces/publications';
 import { defineComponent, PropType, ref } from 'vue';
 import { api } from 'src/boot/axios';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     name: 'Publication',
@@ -132,11 +133,11 @@ export default defineComponent({
         const user = localStorage.getItem('user') || '';
         const userAuth = JSON.parse(user) as IUser;
         const loading = ref(false);
+        const router = useRouter();
 
         // --- FUNCTIONS
         const giveLike = async (publication: IPublication) => {
             loading.value = true;
-            console.log('Publication', publication);
             const liked = publication.likes.findIndex(
                 (x) => x.idUser === userAuth.idUser
             );
@@ -157,7 +158,6 @@ export default defineComponent({
 
         const saveComment = async () => {
             loading.value = true;
-            console.log('Guardar comentario');
             const params: IComment = {
                 description: comment.value,
                 users: userAuth,
@@ -177,13 +177,15 @@ export default defineComponent({
                 return x;
             });
 
-            console.log('Save comment', publication);
             emit('addComment', publication);
             loading.value = false;
         };
-
+        
+        const goProfile = (idUser = '') => {
+            void router.push({name: 'Profile', params: { id: idUser}});
+        };
         // --- RETURNS
-        return { giveLike, showComments, addComment, comment, saveComment, loading };
+        return { giveLike, showComments, addComment, comment, saveComment, loading, goProfile };
     },
 });
 </script>
