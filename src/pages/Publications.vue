@@ -3,7 +3,7 @@
     <q-page padding class="q-gutter-md row justify-center">
         <div v-if="loading">
             <q-spinner-puff color="primary" size="2em" />
-            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+            <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
         </div>
         <div class="q-pa-md" style="width: 700px">
             <p class="text-h6">Hey tell us something...</p>

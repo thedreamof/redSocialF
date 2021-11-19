@@ -2,7 +2,7 @@
     <q-card class="publication">
         <div v-if="loading">
             <q-spinner-puff color="primary" size="2em" />
-            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+            <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
         </div>
         <q-item>
             <q-item-section avatar style="cursor: pointer;">

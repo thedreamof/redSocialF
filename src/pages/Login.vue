@@ -2,7 +2,7 @@
     <div class="login-content row justify-center items-center">
         <div v-if="loading">
             <q-spinner-puff color="primary" size="2em" />
-            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+            <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
         </div>
         <q-card flat bordered class="login">
             <q-card-section>

@@ -2,7 +2,7 @@
     <div class="q-pa-md row justify-center">
         <div v-if="loadingUser">
             <q-spinner-puff color="primary" size="2em" />
-            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+            <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
         </div>
         <!-- <div class="text-h3 text-center" style="width: 100%">
             Welcome to your profile
@@ -37,7 +37,7 @@
                 <div class="text-h6">Edit your profile</div>
                 <div v-if="loading">
                     <q-spinner-puff color="primary" size="2em" />
-                    <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+                    <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
                 </div>
             </q-card-section>
 
@@ -127,7 +127,7 @@
         <div class="publication-content flex justify-center q-gutter-md">
             <div v-if="loadingPublication">
                 <q-spinner-puff color="primary" size="2em" />
-                <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+                <q-tooltip :offset="[0, 8]">Loading</q-tooltip>
             </div>
             <!-- <q-card
                 class="publication"
