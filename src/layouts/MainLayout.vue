@@ -17,69 +17,25 @@
                     shrink
                     class="row items-center no-wrap"
                 >
-                    <!-- <img
-                        src="https://cdn.quasar.dev/img/layout-gallery/logo-google.svg"
-                    /> -->
                     <span class="q-ml-sm">Red social</span>
                 </q-toolbar-title>
 
                 <q-space />
 
-                <q-input
-                    class="GNL__toolbar-input"
-                    outlined
-                    dense
-                    v-model="search"
-                    color="bg-grey-7 shadow-1"
-                    placeholder="Search people"
-                >
-                    <template v-slot:prepend>
-                        <q-icon v-if="search === ''" name="search" />
-                        <q-icon
-                            v-else
-                            name="clear"
-                            class="cursor-pointer"
-                            @click="search = ''"
-                        />
-                    </template>
-                </q-input>
-
-                <q-space />
-
-                <div class="q-gutter-sm row items-center no-wrap">
-                    <!-- <q-btn
-                        v-if="$q.screen.gt.sm"
-                        round
-                        dense
-                        flat
-                        color="text-grey-7"
-                        icon="apps"
-                    >
-                        <q-tooltip>Google Apps</q-tooltip>
-                    </q-btn>
-                    <q-btn round dense flat color="grey-8" icon="notifications">
-                        <q-badge color="red" text-color="white" floating>
-                            2
-                        </q-badge>
-                        <q-tooltip>Notifications</q-tooltip>
-                    </q-btn> -->
+                <div v-if="user" class="q-gutter-sm row items-center no-wrap">
                     <q-btn round flat>
                         <q-avatar size="26px">
-                            <img
-                                src="https://cdn.quasar.dev/img/boy-avatar.png"
-                            />
+                            <img :src="user.avatar" />
                         </q-avatar>
                         <q-menu>
                             <div class="row no-wrap q-pa-md">
                                 <div class="column items-center">
                                     <q-avatar size="72px">
-                                        <img
-                                            src="https://cdn.quasar.dev/img/avatar4.jpg"
-                                        />
+                                        <img :src="user.avatar" />
                                     </q-avatar>
 
                                     <div class="text-subtitle1 q-mt-md q-mb-xs">
-                                        {{userAuth.username}}
+                                        {{ user.username }}
                                     </div>
 
                                     <q-btn
@@ -94,14 +50,6 @@
                             </div>
                         </q-menu>
                     </q-btn>
-                    <!-- <q-btn round flat>
-                        <q-avatar size="26px">
-                            <img
-                                src="https://cdn.quasar.dev/img/boy-avatar.png"
-                            />
-                        </q-avatar>
-                        <q-tooltip>Account</q-tooltip>
-                    </q-btn> -->
                 </div>
             </q-toolbar>
         </q-header>
@@ -157,7 +105,7 @@
 import { ref } from 'vue';
 import { IUser } from 'src/interfaces/users';
 import { useRouter } from 'vue-router';
-// import { fasGlobeAmericas, fasFlask } from '@quasar/extras/fontawesome-v5';
+import { api } from 'src/boot/axios';
 
 export default {
     name: 'MainLayout',
@@ -167,25 +115,37 @@ export default {
         const router = useRouter();
         const leftDrawerOpen = ref(false);
         const search = ref('');
-        const user = localStorage.getItem('user') || '';
-        const userAuth: IUser = JSON.parse(user) as IUser;
+        const local = localStorage.getItem('user') || '';
+        const userAuth: IUser = JSON.parse(local) as IUser;
+        const user = ref<IUser>();
 
         const links = [
             { icon: 'web', text: 'Publications', go: 'Publications' },
-            { icon: 'people', text: 'People', go: 'Peoples' },
-            { icon: 'person', text: 'Profile', go: 'Profile' }
+            { icon: 'person', text: 'Profile', go: 'Profile' },
         ];
 
         // --- FUNCTIONS
+
+        const getUser = async () => {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            user.value = (await api.get(`/users/${userAuth.idUser}`)).data as IUser;
+        };
+
         const toggleLeftDrawer = () => {
             leftDrawerOpen.value = !leftDrawerOpen.value;
-        }
+        };
 
         const logout = () => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            void router.push({name: 'Login'});
-        }
+            void router.push({ name: 'Login' });
+        };
+
+        // setInterval(() => {
+        //     void getUser();    
+        // }, 10000);
+
+        void getUser();
 
         // --- RETURNS
         return {
@@ -195,6 +155,7 @@ export default {
             toggleLeftDrawer,
             userAuth,
             logout,
+            user
         };
     },
 };

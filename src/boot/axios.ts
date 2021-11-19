@@ -19,7 +19,6 @@ const api = axios.create({ baseURL: 'http://localhost:3000/' });
 api.interceptors.request.use(function (config) {
   // Do something before request is sent
   const token: string = localStorage.getItem('token') || '';
-  console.log('Entra', token);
   config.headers = { 
     'Authorization': `Bearer ${token}`,
   }
@@ -36,10 +35,9 @@ api.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
 
-  console.warn('Error', error);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if ( error.response.status === 401 ) {
-    console.warn('Error authorization 401');
+    console.error('Error authorization 401');
     localStorage.removeItem('token');
     window.location.href = '/';
   }

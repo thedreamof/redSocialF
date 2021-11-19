@@ -1,5 +1,5 @@
 <template>
-    <div class=" q-pa-md row justify-center">
+    <div class="q-pa-md row justify-center">
         <!-- <div class="text-h3 text-center" style="width: 100%">
             Welcome to your profile
         </div> -->
@@ -14,10 +14,7 @@
                 </q-card-section>
 
                 <q-card-section class="col-5 flex flex-center">
-                    <q-img
-                        class="rounded-borders"
-                        :src="'https://cdn.quasar.dev/img/avatar.png'"
-                    />
+                    <q-img class="rounded-borders" :src="avatar" />
                     <!-- <q-avatar>
                         <img src="https://cdn.quasar.dev/img/avatar.png" />
                     </q-avatar> -->
@@ -40,6 +37,17 @@
 
             <q-card-section>
                 <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+                    <q-file
+                        color="teal"
+                        filled
+                        label="Upload image profile"
+                        v-model="filename"
+                        @update:model-value="updateAvatar"
+                    >
+                        <template v-slot:prepend>
+                            <q-icon name="cloud_upload" />
+                        </template>
+                    </q-file>
                     <q-input
                         filled
                         v-model="name"
@@ -117,7 +125,7 @@
                 <q-item>
                     <q-item-section avatar>
                         <q-avatar>
-                            <img src="https://cdn.quasar.dev/img/avatar2.jpg" />
+                            <img :src="item.userCreated.avatar" />
                         </q-avatar>
                     </q-item-section>
 
@@ -174,6 +182,7 @@ export default defineComponent({
         const router = useRouter();
         const form = reactive({
             avatar: '',
+            filename: null,
             name: '',
             lastname: '',
             username: '',
@@ -186,27 +195,47 @@ export default defineComponent({
         ) as IUser;
 
         // --- FUNCTIONS
+        const updateAvatar = (e: any) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                form.avatar = e.target?.result as string;
+            };
+            void reader.readAsDataURL(form.filename as unknown as Blob);
+        };
+
         const getUser = async () => {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            const res = (await api.get(`/users/${userAuth.username}`))
+            const res = (await api.get(`/users/${userAuth.idUser}`))
                 .data as IUser;
-            console.log(res);
 
             form.avatar = res.avatar || '';
             form.name = res.name || '';
             form.lastname = res.lastname || '';
             form.username = res.username || '';
             form.description = res.description || '';
+
+            const user = {
+                avatar: res.avatar,
+                description: res.description,
+                lastname: res.lastname,
+                name: res.name,
+                username: res.username,
+                idUser: res._id,
+            };
+
+            localStorage.removeItem('user');
+            setTimeout(() => {
+                localStorage.setItem('user', JSON.stringify(user));
+            }, 500);
         };
 
         const getPublications = async () => {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            const res: Array<IPublication> = (
+            const res: Array<IPublication> =
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                await api.get(`/publications/user/${userAuth.idUser}`)
-            ).data as Array<IPublication>;
+                (await api.get(`/publications/user/${userAuth.idUser}`))
+                    .data as Array<IPublication>;
 
-            console.log('RES', res);
             if (!res) return;
 
             let publicationsSort = res.sort(
@@ -236,9 +265,19 @@ export default defineComponent({
             };
 
             try {
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                const res: unknown = (await api.put(`users/${userAuth.idUser}`, params)).data;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const res: {
+                    _id: string;
+                    username: string;
+                    avatar: string;
+                    name: string;
+                    lastname: string;
+                } = // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                (await api.put(`users/${userAuth.idUser}`, params)).data;
                 if (res) {
+                    
+                    void getPublications();
+
                     $q.notify({
                         color: 'green-4',
                         textColor: 'white',
@@ -260,7 +299,7 @@ export default defineComponent({
         };
 
         const onReset = () => {
-            form.avatar = '';
+            (form.filename = null), (form.avatar = '');
             form.name = '';
             form.lastname = '';
             form.username = '';
@@ -271,24 +310,25 @@ export default defineComponent({
             const liked = publication.likes.findIndex(
                 (x) => x.idUser === userAuth.idUser
             );
+            let res: IPublication;
             if (liked < 0) {
-                const res: IPublication = (
+                res = (
                     await api.put(
                         `publications/${publication._id}/addLike`,
                         userAuth
                     )
                 ).data as IPublication;
-                publications.value[index] = res;
             } else {
-                // (await api.post('deleteLike')).data;
-                const res: IPublication = (
+                res = (
                     await api.put(
                         `publications/${publication._id}/deleteLike`,
                         userAuth
                     )
                 ).data as IPublication;
-                publications.value[index] = res;
             }
+
+            res.createAt = new Date(res.createAt).toLocaleString();
+            publications.value[index] = res;
         };
 
         // --- Initial functions
@@ -296,7 +336,15 @@ export default defineComponent({
         void getPublications();
 
         // --- RETURNS
-        return { ...toRefs(form), onSubmit, onReset, isEditing, publications, giveLike };
+        return {
+            ...toRefs(form),
+            onSubmit,
+            onReset,
+            isEditing,
+            publications,
+            giveLike,
+            updateAvatar,
+        };
     },
 });
 </script>

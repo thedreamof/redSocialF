@@ -167,7 +167,7 @@ export default defineComponent({
                 };
 
                 try {
-                    const res: unknown = (await api.post('/users', params))
+                    const res: unknown = (await api.post('auth/signup', params))
                         .data;
                     if (res) {
                         $q.notify({
@@ -210,6 +210,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .login-content {
+    background: linear-gradient(64deg, steelblue, lightgray);
     height: 100vh;
 }
 

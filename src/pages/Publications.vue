@@ -25,7 +25,15 @@
         </div>
 
         <div class="publication-content flex justify-center q-gutter-md">
-            <q-card
+            <Publication
+                v-for="(item, index) in publications"
+                :key="item"
+                :publication="item"
+                @giveLike="giveLike(index, $event)"
+                @addComment="addComment(index, $event)"
+            />
+
+            <!-- <q-card
                 class="publication"
                 v-for="(item, index) in publications"
                 :key="item"
@@ -33,7 +41,7 @@
                 <q-item>
                     <q-item-section avatar>
                         <q-avatar>
-                            <img src="https://cdn.quasar.dev/img/avatar2.jpg" />
+                            <img :src="item.userCreated.avatar" />
                         </q-avatar>
                     </q-item-section>
 
@@ -64,12 +72,19 @@
                     </q-item-section>
                 </q-item>
 
-                <!-- <img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
+                <q-card-section>
+                    <div>
+                        {{ item.description }}
+                    </div>
+                    <q-card-actions horizontal class="justify-end q-px-md">
+                        <q-chip clickable icon="comment">Comment</q-chip>
+                    </q-card-actions>
+                </q-card-section>
 
                 <q-card-section>
-                    {{ item.description }}
+
                 </q-card-section>
-            </q-card>
+            </q-card> -->
         </div>
     </q-page>
 </template>
@@ -77,36 +92,77 @@
 <script lang="ts">
 import { api } from 'src/boot/axios';
 import { defineComponent, ref, reactive, toRefs } from 'vue';
-import { IPublication, IUser } from 'src/interfaces/publications';
+import { IComment, IPublication, IUser } from 'src/interfaces/publications';
+import Publication from 'src/components/Publication.vue';
 
 export default defineComponent({
     name: 'Publications',
+    components: {
+        Publication,
+    },
     setup() {
         // --- VARIABLES
         const publications = ref<Array<IPublication>>([]);
         const user = localStorage.getItem('user') || '';
-        const userAuth = (JSON.parse(user) as IUser) || null;
+        // console.log('Usuario', user);
+        const userAuth = JSON.parse(user) as IUser;
         const form = reactive({
             title: '',
             description: '',
         });
+        console.log('UserAuth', userAuth);
 
         // --- FUNCTIONS
-        const getPublications = async () => {
-            const res: Array<IPublication> = (await api.get('/publications'))
-                .data as Array<IPublication>;
 
-            let publicationsSort = res.sort((a: IPublication, b: IPublication) => {
-				return new Date(b.createAt).getTime() - new Date(a.createAt).getTime();
-			});
+        const sortPublication = (publication: IPublication[]) => {
+
+            let publicationsSort: IPublication[] = publication.sort(
+                (a: IPublication, b: IPublication) => {
+                    return (
+                        new Date(b.createAt).getTime() -
+                        new Date(a.createAt).getTime()
+                    );
+                }
+            );
 
             publicationsSort = publicationsSort.map((x) => {
                 x.createAt = new Date(x.createAt).toLocaleString();
                 return x;
             });
 
-            publications.value = publicationsSort;
+            return publicationsSort;
+        };
 
+         const sortComments = (comments: IComment[]) => {
+
+            let commentsSort: IComment[] = comments.sort(
+                (a: IComment, b: IComment) => {
+                    return (
+                        new Date(b.createAt).getTime() -
+                        new Date(a.createAt).getTime()
+                    );
+                }
+            );
+
+            commentsSort = commentsSort.map((x) => {
+                x.createAt = new Date(x.createAt).toLocaleString();
+                return x;
+            });
+
+            return commentsSort;
+        };
+
+        const getPublications = async () => {
+            const res: Array<IPublication> = (await api.get('/publications'))
+                .data as Array<IPublication>;
+
+            let sorted = sortPublication(res);
+            sorted = sorted.map( (x) => {
+                x.comments = sortComments(x.comments);
+                return x;
+            })
+
+            publications.value = sorted;
         };
 
         const reset = () => {
@@ -124,35 +180,25 @@ export default defineComponent({
             }
         };
 
-        const giveLike = async (publication: IPublication, index: number) => {
-            const liked = publication.likes.findIndex(
-                (x) => x.idUser === userAuth.idUser
-            );
-            if (liked < 0) {
-                const res: IPublication = (
-                    await api.put(
-                        `publications/${publication._id}/addLike`,
-                        userAuth
-                    )
-                ).data as IPublication;
-                publications.value[index] = res;
-            } else {
-                // (await api.post('deleteLike')).data;
-                const res: IPublication = (
-                    await api.put(
-                        `publications/${publication._id}/deleteLike`,
-                        userAuth
-                    )
-                ).data as IPublication;
-                publications.value[index] = res;
-            }
+        const giveLike = (index: number, liked: IPublication) => {
+            publications.value[index] = liked;
+        };
+
+        const addComment = (index: number, comment: IPublication) => {
+            publications.value[index] = comment;
         };
 
         // --- initial functions
         void getPublications();
 
         // --- RETURNS
-        return { publications, giveLike, ...toRefs(form), onSubmit };
+        return {
+            publications,
+            giveLike,
+            ...toRefs(form),
+            onSubmit,
+            addComment,
+        };
     },
 });
 </script>
@@ -165,11 +211,5 @@ export default defineComponent({
     // justify-content: center;
     // flex-wrap: wrap;
     // gap: 15px;
-}
-
-.publication {
-    width: 100%;
-    height: 100%;
-    max-width: 600px;
 }
 </style>

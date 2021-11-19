@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 <template>
     <div class="login-content row justify-center items-center">
         <q-card flat bordered class="login">
@@ -93,13 +92,14 @@ export default defineComponent({
                 localStorage.setItem('user', JSON.stringify(res.payload));
                 void router.push({ name: 'Publications' });
             } catch (error: any) {
+
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                const err = error.message as string;
+                console.error(error.message);
                 $q.notify({
                     color: 'red-5',
                     textColor: 'white',
                     icon: 'error',
-                    message: err || 'Error try again',
+                    message: 'Username or passwords is not correct!',
                 });
             }
         };
@@ -121,6 +121,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .login-content {
+    background: linear-gradient(64deg, steelblue, lightgray);
     height: 100vh;
 }
 
