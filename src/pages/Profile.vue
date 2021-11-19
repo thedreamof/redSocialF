@@ -129,7 +129,7 @@
                 <q-spinner-puff color="primary" size="2em" />
                 <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
             </div>
-            <q-card
+            <!-- <q-card
                 class="publication"
                 v-for="(item, index) in publications"
                 :key="item"
@@ -168,12 +168,16 @@
                     </q-item-section>
                 </q-item>
 
-                <!-- <img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
-
                 <q-card-section>
                     {{ item.description }}
                 </q-card-section>
-            </q-card>
+            </q-card> -->
+            <Publication
+                v-for="(item, index) in publications"
+                :key="item"
+                :publication="item"
+                @giveLike="giveLike(item, index)"
+            />
         </div>
     </div>
 </template>
@@ -185,9 +189,13 @@ import { useRouter } from 'vue-router';
 import { api } from 'src/boot/axios';
 import { IUser } from 'src/interfaces/users';
 import { IPublication } from 'src/interfaces/publications';
+import Publication from 'src/components/Publication.vue'
 
 export default defineComponent({
     name: 'Profile',
+    components: {
+        Publication,
+    },
     setup() {
         // --- VARIABLES
         const $q = useQuasar();
