@@ -211,9 +211,8 @@ export default defineComponent({
         });
         const isEditing = ref(false);
         const publications = ref<Array<IPublication>>([]);
-        const userAuth = JSON.parse(
-            localStorage.getItem('user') || ''
-        ) as IUser;
+        const user = localStorage.getItem('user') || '';
+        const userAuth = JSON.parse(user) as IUser;
         const loading = ref(false);
         const loadingUser = ref(false);
         const loadingPublication = ref(false);
@@ -252,8 +251,8 @@ export default defineComponent({
 
             if( userAuth.idUser === route.params.id ) {
                 canEdit.value = true;
-                localStorage.removeItem('user');
                 setTimeout(() => {
+                    localStorage.removeItem('user');
                     localStorage.setItem('user', JSON.stringify(user));
                 }, 500);
             }
