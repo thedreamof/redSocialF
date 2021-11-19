@@ -1,6 +1,10 @@
 <template>
     <!-- <div class="q-page q-pa-md row justify-center items-center q-gutter-md"> -->
     <q-page padding class="q-gutter-md row justify-center">
+        <div v-if="loading">
+            <q-spinner-puff color="primary" size="2em" />
+            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+        </div>
         <div class="q-pa-md" style="width: 700px">
             <p class="text-h6">Hey tell us something...</p>
             <q-form @submit="onSubmit" class="q-gutter-md">
@@ -111,11 +115,11 @@ export default defineComponent({
             description: '',
         });
         console.log('UserAuth', userAuth);
+        const loading = ref(true);
 
         // --- FUNCTIONS
 
         const sortPublication = (publication: IPublication[]) => {
-
             let publicationsSort: IPublication[] = publication.sort(
                 (a: IPublication, b: IPublication) => {
                     return (
@@ -133,8 +137,7 @@ export default defineComponent({
             return publicationsSort;
         };
 
-         const sortComments = (comments: IComment[]) => {
-
+        const sortComments = (comments: IComment[]) => {
             let commentsSort: IComment[] = comments.sort(
                 (a: IComment, b: IComment) => {
                     return (
@@ -153,16 +156,18 @@ export default defineComponent({
         };
 
         const getPublications = async () => {
+            loading.value = true;
             const res: Array<IPublication> = (await api.get('/publications'))
                 .data as Array<IPublication>;
 
             let sorted = sortPublication(res);
-            sorted = sorted.map( (x) => {
+            sorted = sorted.map((x) => {
                 x.comments = sortComments(x.comments);
                 return x;
-            })
+            });
 
             publications.value = sorted;
+            loading.value = false;
         };
 
         const reset = () => {
@@ -171,6 +176,7 @@ export default defineComponent({
         };
 
         const onSubmit = async () => {
+            loading.value = true;
             const params = { ...form, userCreated: userAuth };
             const res: IPublication = (await api.post('/publications', params))
                 .data as IPublication;
@@ -178,6 +184,7 @@ export default defineComponent({
                 reset();
                 void getPublications();
             }
+            loading.value = false;
         };
 
         const giveLike = (index: number, liked: IPublication) => {
@@ -198,6 +205,7 @@ export default defineComponent({
             ...toRefs(form),
             onSubmit,
             addComment,
+            loading,
         };
     },
 });

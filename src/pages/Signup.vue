@@ -1,5 +1,9 @@
 <template>
     <div class="login-content row justify-center items-center">
+         <div v-if="loading">
+            <q-spinner-puff color="primary" size="2em" />
+            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+        </div>
         <q-card flat bordered class="login">
             <q-card-section>
                 <div class="text-h6">Welcome to new red</div>
@@ -117,7 +121,7 @@
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { api } from 'src/boot/axios';
-import { defineComponent, toRefs, reactive } from 'vue';
+import { defineComponent, toRefs, reactive, ref } from 'vue';
 
 export default defineComponent({
     name: 'Signup',
@@ -135,6 +139,7 @@ export default defineComponent({
             description: null,
             accept: false,
         });
+        const loading = ref(false);
 
         // --- FUNCTIONS
         const auth = async () => {
@@ -149,6 +154,7 @@ export default defineComponent({
         };
 
         const onSubmit = async () => {
+            loading.value = true;
             if (form.accept !== true) {
                 $q.notify({
                     color: 'red-5',
@@ -190,6 +196,7 @@ export default defineComponent({
                     });
                 }
             }
+            loading.value = false;
         };
 
         const onReset = () => {
@@ -203,7 +210,7 @@ export default defineComponent({
         };
 
         // --- RETURNS
-        return { ...toRefs(form), onSubmit, onReset };
+        return { ...toRefs(form), onSubmit, onReset, loading };
     },
 });
 </script>

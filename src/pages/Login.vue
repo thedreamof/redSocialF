@@ -1,5 +1,9 @@
 <template>
     <div class="login-content row justify-center items-center">
+        <div v-if="loading">
+            <q-spinner-puff color="primary" size="2em" />
+            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+        </div>
         <q-card flat bordered class="login">
             <q-card-section>
                 <div class="text-h6">Login</div>
@@ -51,14 +55,14 @@
 
             <q-card-section>
                 Are you have not register?
-                    <q-chip
-                        clickable
-                        @click="goSignUp"
-                        color="primary"
-                        text-color="white"
-                    >
-                        Click here!
-                    </q-chip>
+                <q-chip
+                    clickable
+                    @click="goSignUp"
+                    color="primary"
+                    text-color="white"
+                >
+                    Click here!
+                </q-chip>
             </q-card-section>
         </q-card>
     </div>
@@ -68,7 +72,7 @@
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
-import { defineComponent, reactive, toRefs } from 'vue';
+import { defineComponent, reactive, toRefs, ref } from 'vue';
 
 export default defineComponent({
     setup() {
@@ -79,9 +83,11 @@ export default defineComponent({
             username: '',
             password: '',
         });
+        const loading = ref(true);
 
         // --- FUNCTIONS
         const onSubmit = async () => {
+            loading.value = true;
             try {
                 const params = form;
                 const res: { token: string; payload: unknown } = (
@@ -92,7 +98,6 @@ export default defineComponent({
                 localStorage.setItem('user', JSON.stringify(res.payload));
                 void router.push({ name: 'Publications' });
             } catch (error: any) {
-
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 console.error(error.message);
                 $q.notify({
@@ -102,6 +107,7 @@ export default defineComponent({
                     message: 'Username or passwords is not correct!',
                 });
             }
+            loading.value = false;
         };
 
         const onReset = () => {
@@ -114,7 +120,7 @@ export default defineComponent({
         };
 
         // --- RETURNS
-        return { ...toRefs(form), onSubmit, onReset, goSignUp };
+        return { ...toRefs(form), onSubmit, onReset, goSignUp, loading };
     },
 });
 </script>

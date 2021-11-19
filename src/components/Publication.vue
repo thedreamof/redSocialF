@@ -1,5 +1,9 @@
 <template>
     <q-card class="publication">
+        <div v-if="loading">
+            <q-spinner-puff color="primary" size="2em" />
+            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+        </div>
         <q-item>
             <q-item-section avatar>
                 <q-avatar>
@@ -127,9 +131,11 @@ export default defineComponent({
         const comment = ref('');
         const user = localStorage.getItem('user') || '';
         const userAuth = JSON.parse(user) as IUser;
+        const loading = ref(false);
 
         // --- FUNCTIONS
         const giveLike = async (publication: IPublication) => {
+            loading.value = true;
             console.log('Publication', publication);
             const liked = publication.likes.findIndex(
                 (x) => x.idUser === userAuth.idUser
@@ -146,9 +152,11 @@ export default defineComponent({
             res.createAt = new Date(res.createAt).toLocaleString();
             // publications.value[index] = res;
             emit('giveLike', res);
+            loading.value = false;
         };
 
         const saveComment = async () => {
+            loading.value = true;
             console.log('Guardar comentario');
             const params: IComment = {
                 description: comment.value,
@@ -171,10 +179,11 @@ export default defineComponent({
 
             console.log('Save comment', publication);
             emit('addComment', publication);
+            loading.value = false;
         };
 
         // --- RETURNS
-        return { giveLike, showComments, addComment, comment, saveComment };
+        return { giveLike, showComments, addComment, comment, saveComment, loading };
     },
 });
 </script>

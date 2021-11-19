@@ -1,5 +1,9 @@
 <template>
     <div class="q-pa-md row justify-center">
+        <div v-if="loadingUser">
+            <q-spinner-puff color="primary" size="2em" />
+            <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+        </div>
         <!-- <div class="text-h3 text-center" style="width: 100%">
             Welcome to your profile
         </div> -->
@@ -31,6 +35,10 @@
         <q-card v-if="isEditing" flat bordered class="edit-profile">
             <q-card-section>
                 <div class="text-h6">Edit your profile</div>
+                <div v-if="loading">
+                    <q-spinner-puff color="primary" size="2em" />
+                    <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+                </div>
             </q-card-section>
 
             <q-separator inset />
@@ -117,6 +125,10 @@
         </q-card>
 
         <div class="publication-content flex justify-center q-gutter-md">
+            <div v-if="loadingPublication">
+                <q-spinner-puff color="primary" size="2em" />
+                <q-tooltip :offset="[0, 8]">QSpinnerPuff</q-tooltip>
+            </div>
             <q-card
                 class="publication"
                 v-for="(item, index) in publications"
@@ -193,6 +205,9 @@ export default defineComponent({
         const userAuth = JSON.parse(
             localStorage.getItem('user') || ''
         ) as IUser;
+        const loading = ref(false);
+        const loadingUser = ref(false);
+        const loadingPublication = ref(false);
 
         // --- FUNCTIONS
         const updateAvatar = (e: any) => {
@@ -204,6 +219,7 @@ export default defineComponent({
         };
 
         const getUser = async () => {
+            loadingUser.value = true;
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             const res = (await api.get(`/users/${userAuth.idUser}`))
                 .data as IUser;
@@ -227,9 +243,12 @@ export default defineComponent({
             setTimeout(() => {
                 localStorage.setItem('user', JSON.stringify(user));
             }, 500);
+
+            loadingUser.value = false;
         };
 
         const getPublications = async () => {
+            loadingPublication.value = true;
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             const res: Array<IPublication> =
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -253,6 +272,7 @@ export default defineComponent({
             });
 
             publications.value = publicationsSort;
+            loadingPublication.value = false;
         };
 
         const onSubmit = async () => {
@@ -265,6 +285,8 @@ export default defineComponent({
             };
 
             try {
+                loading.value = true;
+
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const res: {
                     _id: string;
@@ -272,10 +294,10 @@ export default defineComponent({
                     avatar: string;
                     name: string;
                     lastname: string;
-                } = // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                (await api.put(`users/${userAuth.idUser}`, params)).data;
+                } = ( // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    await api.put(`users/${userAuth.idUser}`, params)
+                ).data;
                 if (res) {
-                    
                     void getPublications();
 
                     $q.notify({
@@ -296,6 +318,7 @@ export default defineComponent({
                     message: 'Error try again',
                 });
             }
+            loading.value = false;
         };
 
         const onReset = () => {
@@ -307,6 +330,7 @@ export default defineComponent({
         };
 
         const giveLike = async (publication: IPublication, index: number) => {
+            loading.value = true;
             const liked = publication.likes.findIndex(
                 (x) => x.idUser === userAuth.idUser
             );
@@ -329,6 +353,7 @@ export default defineComponent({
 
             res.createAt = new Date(res.createAt).toLocaleString();
             publications.value[index] = res;
+            loading.value = false;
         };
 
         // --- Initial functions
@@ -344,6 +369,9 @@ export default defineComponent({
             publications,
             giveLike,
             updateAvatar,
+            loading,
+            loadingUser,
+            loadingPublication,
         };
     },
 });
